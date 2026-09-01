@@ -8,106 +8,107 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #101a2b;
-    --panel: #172439;
-    --line: #26364f;
-    --text: #eef3fa;
-    --muted: #8c9bb3;
-    --c1: #ff6f59; --c2: #ffc145; --c3: #3fd9a3; --c4: #5db6ff; --c5: #c98cff;
+    --bg: #0b0f16;
+    --text: #f4f6fa;
+    --muted: #8b95a7;
+    /* Zonenfarben nach Whoop-Vorbild */
+    --z0: #4a5261; --z1: #4a9dd8; --z2: #3ec46d; --z3: #f2c531; --z4: #f58a1f; --z5: #e8323c;
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; background: var(--bg); color: var(--text); font-family: "Barlow", system-ui, sans-serif; }
-  body { padding: 16px 16px calc(24px + env(safe-area-inset-bottom)); max-width: 720px; margin: 0 auto; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: "Barlow", system-ui, sans-serif; overflow: hidden; }
+  body { display: flex; flex-direction: column; }
 
-  header { display: flex; align-items: baseline; justify-content: space-between; margin: 8px 0 20px; }
-  h1 { font-family: "Barlow Condensed", "Barlow", sans-serif; font-weight: 700; font-size: 32px; letter-spacing: .01em; margin: 0; }
-  #clock { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 18px; }
+  #grid {
+    flex: 1; display: grid; gap: 10px; padding: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    grid-auto-rows: 1fr;
+  }
+  .tile {
+    position: relative; border-radius: 22px; padding: 4% 5%;
+    display: flex; flex-direction: column; justify-content: space-between;
+    background: var(--z0); color: #fff; transition: background .6s;
+    min-height: 200px; container-type: size;
+  }
+  .tile.light { color: #101418; }
+  .tile.stale { opacity: .45; }
+  .tile .name {
+    font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: clamp(28px, 14cqh, 64px);
+    background: none; border: 0; color: inherit; width: 100%; padding: 0; outline: none; font-variant: normal;
+    text-overflow: ellipsis; line-height: 1;
+  }
+  .tile .name:focus { text-decoration: underline dotted; }
+  .tile .bpm {
+    font-family: "Barlow Condensed", sans-serif; font-weight: 700; line-height: .85; letter-spacing: -.02em;
+    font-size: clamp(90px, 55cqh, 340px); font-variant-numeric: tabular-nums; text-align: center;
+  }
+  .tile .foot { display: flex; justify-content: space-between; align-items: baseline; font-size: clamp(18px, 9cqh, 40px); line-height: 1; }
+  .tile .zone { font-family: "Barlow Condensed", sans-serif; font-weight: 700; }
+  .tile .max { background: none; border: 0; color: inherit; font: inherit; opacity: .75; cursor: pointer; padding: 0; }
+  .tile .state { position: absolute; top: 10px; right: 14px; font-size: 14px; opacity: .8; }
+  .tile .remove { position: absolute; bottom: 8px; right: 12px; background: none; border: 0; color: inherit; font: inherit; font-size: 13px; opacity: 0; cursor: pointer; }
+  .tile:hover .remove, .tile:focus-within .remove { opacity: .7; }
 
-  .device {
-    display: grid; grid-template-columns: 8px 1fr auto; gap: 0 16px;
-    background: var(--panel); border-radius: 14px; overflow: hidden; margin-bottom: 12px;
-    min-height: 132px;
-  }
-  .device .bar { background: var(--c); }
-  .device .body { padding: 14px 0 14px 4px; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
-  .device .name {
-    font-size: 17px; font-weight: 500; color: var(--text); background: none; border: 0; padding: 0; width: 100%;
-    font-family: inherit; outline: none; border-bottom: 1px dashed transparent;
-  }
-  .device .name:focus { border-bottom-color: var(--muted); }
-  .device .state { font-size: 14px; color: var(--muted); }
-  .device .state.off { color: var(--c1); }
-  .device .stats { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; display: flex; gap: 14px; }
-  .device .bpm-wrap { padding: 8px 16px 8px 0; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; }
-  .device .bpm {
-    font-family: "Barlow Condensed", "Barlow", sans-serif; font-weight: 700; font-size: 84px; line-height: .9;
-    color: var(--c); font-variant-numeric: tabular-nums; letter-spacing: -.01em;
-  }
-  .device .bpm.stale { color: var(--muted); }
-  .device .unit { font-size: 14px; color: var(--muted); margin-top: 4px; }
-  .device canvas { width: 100%; height: 34px; display: block; margin-top: 8px; }
-  .device .remove {
-    grid-column: 2 / 4; border: 0; border-top: 1px solid var(--line); background: none; color: var(--muted);
-    font: inherit; font-size: 13px; padding: 8px 16px 10px 4px; text-align: left; cursor: pointer;
-  }
+  #bar { display: flex; gap: 8px; padding: 0 10px 10px; align-items: center; }
+  #bar button { border: 0; border-radius: 12px; padding: 12px 16px; font: inherit; font-size: 15px; cursor: pointer; background: #1b2230; color: var(--text); }
+  #bar #add { background: var(--text); color: var(--bg); font-weight: 500; }
+  #bar .spacer { flex: 1; }
+  #bar #legend { display: flex; gap: 4px; }
+  #legend span { width: 28px; height: 10px; border-radius: 3px; display: block; }
 
-  #add {
-    width: 100%; border: 0; border-radius: 14px; padding: 18px; margin-top: 8px;
-    background: var(--text); color: var(--bg); font: inherit; font-weight: 500; font-size: 18px; cursor: pointer;
-  }
-  #add:disabled { opacity: .5; cursor: default; }
-  #add:focus-visible { outline: 3px solid var(--c4); outline-offset: 2px; }
-
-  .note { color: var(--muted); font-size: 15px; line-height: 1.45; margin-top: 18px; }
-  .note b { color: var(--text); font-weight: 500; }
-  #warn { display: none; background: #3a2323; color: #ffd6d0; border-radius: 12px; padding: 14px; line-height: 1.45; margin-bottom: 16px; }
-  #empty { color: var(--muted); font-size: 17px; line-height: 1.5; padding: 24px 4px; }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .bpm.beat { animation: beat .45s ease-out; }
-    @keyframes beat { 0% { transform: scale(1.06); } 100% { transform: scale(1); } }
-  }
+  #warn { display: none; margin: 10px; background: #3a2323; color: #ffd6d0; border-radius: 12px; padding: 12px 14px; line-height: 1.4; font-size: 15px; }
+  #warn b { color: #fff; font-weight: 500; }
+  #empty { grid-column: 1 / -1; align-self: center; text-align: center; color: var(--muted); font-size: 22px; line-height: 1.5; padding: 40px 20px; }
+  body.hide-bar #bar, body.hide-bar #warn { display: none !important; }
 </style>
 </head>
 <body>
-<header>
-  <h1>Puls-Monitor</h1>
-  <div id="clock">--:--</div>
-</header>
 
-<div id="warn">Dieser Browser kann kein Web Bluetooth. Öffne die Datei in <b>Chrome auf Android</b> (oder am Mac/Windows mit Chrome/Edge). Auf dem iPhone geht es nur über die App „Bluefy“.</div>
+<div id="warn"></div>
 
-<div id="list">
-  <div id="empty">Noch keine Uhr verbunden. Schalte auf jeder Uhr die Herzfrequenz-Übertragung (HR Broadcast) ein, dann tippe unten auf „Uhr verbinden“ – einmal pro Uhr.</div>
+<div id="grid">
+  <div id="empty">Noch niemand verbunden.<br>Auf der Uhr den Herzfrequenz-Broadcast einschalten, dann unten „Uhr verbinden“ – einmal pro Person.</div>
 </div>
 
-<button id="add">Uhr verbinden</button>
-<button id="addAll" style="width:100%;border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:10px;background:none;color:var(--muted);font:inherit;font-size:15px;cursor:pointer">Alle Bluetooth-Geräte anzeigen (zum Testen)</button>
-
-<p class="note">
-  Whoop: App → Settings → Heart Rate Broadcast. Huawei: auf der Uhr die Herzfrequenz-Übertragung starten. Galaxy Watch: Wear-OS-App wie „Heart for Bluetooth“. Brustgurte (Polar, Garmin) senden von selbst.
-</p>
+<div id="bar">
+  <button id="add">Uhr verbinden</button>
+  <button id="addAll" title="Zum Testen">Alle Geräte</button>
+  <div class="spacer"></div>
+  <div id="legend" title="Zone 0 bis 5">
+    <span style="background:var(--z0)"></span><span style="background:var(--z1)"></span><span style="background:var(--z2)"></span>
+    <span style="background:var(--z3)"></span><span style="background:var(--z4)"></span><span style="background:var(--z5)"></span>
+  </div>
+  <button id="full">Vollbild</button>
+</div>
 
 <script>
 (() => {
-  const COLORS = ['--c1','--c2','--c3','--c4','--c5'];
-  const list = document.getElementById('list');
+  const grid = document.getElementById('grid');
   const empty = document.getElementById('empty');
-  const add = document.getElementById('add');
   const warn = document.getElementById('warn');
+  const add = document.getElementById('add');
+  const addAll = document.getElementById('addAll');
   const devices = new Map();
-  let colorIdx = 0;
   let wakeLock = null;
 
-  // Uhrzeit
-  const clock = document.getElementById('clock');
-  const tick = () => { clock.textContent = new Date().toLocaleTimeString('de-AT', {hour:'2-digit', minute:'2-digit'}); };
-  tick(); setInterval(tick, 15000);
+  // Zonen wie bei Whoop: Anteil der maximalen Herzfrequenz
+  const ZONES = [
+    { n: 0, from: 0,    color: '--z0', light: false },
+    { n: 1, from: 0.50, color: '--z1', light: false },
+    { n: 2, from: 0.60, color: '--z2', light: true  },
+    { n: 3, from: 0.70, color: '--z3', light: true  },
+    { n: 4, from: 0.80, color: '--z4', light: true  },
+    { n: 5, from: 0.90, color: '--z5', light: false },
+  ];
+  const zoneFor = (bpm, max) => { const p = bpm / max; let z = ZONES[0]; for (const zz of ZONES) if (p >= zz.from) z = zz; return z; };
+
+  // Namen und Max-Puls merken (wenn der Browser das erlaubt)
+  const store = { get(k) { try { return JSON.parse(localStorage.getItem('pm:' + k)); } catch (e) { return null; } },
+                  set(k, v) { try { localStorage.setItem('pm:' + k, JSON.stringify(v)); } catch (e) {} } };
 
   if (!navigator.bluetooth) {
     warn.style.display = 'block';
-    add.disabled = true;
-    document.getElementById('addAll').disabled = true;
+    warn.innerHTML = 'Dieser Browser kann kein Web Bluetooth. Am iPhone die App <b>Bluefy</b> nutzen, sonst Chrome (Android, Windows, Mac).';
+    add.disabled = addAll.disabled = true;
     return;
   }
 
@@ -116,97 +117,87 @@
   }
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { wakeLock = null; keepAwake(); } });
 
-  function parseHR(dv) {
-    const flags = dv.getUint8(0);
-    return (flags & 1) ? dv.getUint16(1, true) : dv.getUint8(1);
-  }
+  document.getElementById('full').addEventListener('click', () => {
+    document.body.classList.toggle('hide-bar');
+    if (document.body.classList.contains('hide-bar') && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
+  });
+  // Doppeltipp irgendwo bringt die Leiste zurück
+  let lastTap = 0;
+  document.addEventListener('pointerdown', () => { const t = Date.now(); if (t - lastTap < 350) document.body.classList.remove('hide-bar'); lastTap = t; });
 
-  function makeCard(dev) {
-    const color = COLORS[colorIdx++ % COLORS.length];
+  const parseHR = dv => (dv.getUint8(0) & 1) ? dv.getUint16(1, true) : dv.getUint8(1);
+
+  function makeTile(dev) {
+    const saved = store.get(dev.id) || {};
     const el = document.createElement('div');
-    el.className = 'device';
-    el.style.setProperty('--c', `var(${color})`);
+    el.className = 'tile stale';
     el.innerHTML = `
-      <div class="bar"></div>
-      <div class="body">
-        <input class="name" value="" aria-label="Name der Uhr">
-        <div class="state">Verbinde …</div>
-        <div class="stats"><span class="avg">Ø –</span><span class="max">max –</span></div>
-        <canvas></canvas>
+      <div class="state">Verbinde …</div>
+      <input class="name" aria-label="Name">
+      <div class="bpm">–</div>
+      <div class="foot">
+        <div class="zone">Zone –</div>
+        <button class="max" title="Maximalpuls ändern">max –</button>
       </div>
-      <div class="bpm-wrap"><div class="bpm stale">–</div><div class="unit">bpm</div></div>
-      <button class="remove">Uhr entfernen</button>`;
-    el.querySelector('.name').value = dev.name || 'Unbenannte Uhr';
-    list.appendChild(el);
+      <button class="remove">Entfernen</button>`;
+    const name = el.querySelector('.name');
+    name.value = saved.name || dev.name || 'Name';
+    name.addEventListener('focus', () => name.select());
+    grid.appendChild(el);
     empty.style.display = 'none';
     return el;
   }
 
-  function drawSpark(canvas, hist, colorVar) {
-    const dpr = window.devicePixelRatio || 1;
-    const w = canvas.clientWidth, h = canvas.clientHeight;
-    if (canvas.width !== w * dpr) { canvas.width = w * dpr; canvas.height = h * dpr; }
-    const ctx = canvas.getContext('2d');
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, w, h);
-    if (hist.length < 2) return;
-    const min = Math.min(...hist) - 3, max = Math.max(...hist) + 3;
-    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue(colorVar);
-    ctx.lineWidth = 2; ctx.lineJoin = 'round';
-    ctx.beginPath();
-    hist.forEach((v, i) => {
-      const x = (i / (hist.length - 1)) * w;
-      const y = h - ((v - min) / (max - min)) * (h - 4) - 2;
-      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
-    });
-    ctx.stroke();
+  function paint(entry) {
+    const { el, bpm, maxHR } = entry;
+    el.querySelector('.max').textContent = 'max ' + maxHR;
+    if (!bpm) return;
+    const z = zoneFor(bpm, maxHR);
+    el.style.background = `var(${z.color})`;
+    el.classList.toggle('light', z.light);
+    el.querySelector('.zone').textContent = 'Zone ' + z.n;
+    el.querySelector('.bpm').textContent = bpm;
+  }
+
+  function onHR(entry, bpm) {
+    if (!bpm) return;
+    entry.bpm = bpm;
+    entry.el.classList.remove('stale');
+    paint(entry);
+    clearTimeout(entry.staleTimer);
+    entry.staleTimer = setTimeout(() => entry.el.classList.add('stale'), 8000);
   }
 
   async function connect(entry) {
     const { dev, el } = entry;
     const state = el.querySelector('.state');
     try {
-      state.textContent = 'Verbinde …'; state.classList.remove('off');
+      state.textContent = 'Verbinde …';
       const server = await dev.gatt.connect();
       const svc = await server.getPrimaryService('heart_rate');
       const ch = await svc.getCharacteristic('heart_rate_measurement');
       ch.addEventListener('characteristicvaluechanged', e => onHR(entry, parseHR(e.target.value)));
       await ch.startNotifications();
-      state.textContent = 'Live';
+      state.textContent = '';
     } catch (err) {
-      state.textContent = 'Keine Verbindung – Uhr sendet nicht?'; state.classList.add('off');
+      state.textContent = 'Keine Verbindung – sendet die Uhr?';
     }
-  }
-
-  function onHR(entry, bpm) {
-    if (!bpm) return;
-    const { el, hist } = entry;
-    entry.sum += bpm; entry.n++; entry.max = Math.max(entry.max, bpm);
-    hist.push(bpm); if (hist.length > 120) hist.shift();
-    const b = el.querySelector('.bpm');
-    b.textContent = bpm; b.classList.remove('stale');
-    b.classList.remove('beat'); void b.offsetWidth; b.classList.add('beat');
-    el.querySelector('.avg').textContent = 'Ø ' + Math.round(entry.sum / entry.n);
-    el.querySelector('.max').textContent = 'max ' + entry.max;
-    drawSpark(el.querySelector('canvas'), hist, el.style.getPropertyValue('--c').match(/--c\d/)[0]);
-    clearTimeout(entry.staleTimer);
-    entry.staleTimer = setTimeout(() => b.classList.add('stale'), 6000);
   }
 
   async function pick(all) {
     let dev;
     try {
       dev = await navigator.bluetooth.requestDevice(all
-        ? { acceptAllDevices: true, optionalServices: ['heart_rate', 'battery_service'] }
-        : { filters: [{ services: ['heart_rate'] }], optionalServices: ['battery_service'] });
+        ? { acceptAllDevices: true, optionalServices: ['heart_rate'] }
+        : { filters: [{ services: ['heart_rate'] }] });
     } catch (e) {
       warn.style.display = 'block';
       if (e.name === 'NotFoundError') {
         warn.innerHTML = all
-          ? 'Auswahl abgebrochen oder gar kein Bluetooth-Gerät gefunden. Ist Bluetooth für diese App in den iPhone-Einstellungen erlaubt?'
-          : 'Keine Uhr gefunden, die gerade Herzfrequenz sendet. Schalte den HR Broadcast auf der Uhr ein und trenne sie von ihrer eigenen App. Mit „Alle Bluetooth-Geräte anzeigen“ siehst du, ob sie überhaupt sichtbar ist.';
+          ? 'Auswahl abgebrochen oder kein Gerät gefunden. Ist Bluetooth für diese App erlaubt?'
+          : 'Keine Uhr gefunden, die gerade Puls sendet. Broadcast auf der Uhr einschalten (Galaxy Watch: „Heart for Bluetooth“ starten) und die Uhr von ihrer eigenen App trennen.';
       } else if (e.name === 'SecurityError') {
-        warn.innerHTML = 'Bluetooth ist hier gesperrt. Öffne die Datei direkt in Chrome (nicht in einer App-Vorschau) – am Handy über <b>file:///sdcard/Download/puls-monitor.html</b> oder über eine https-Adresse.';
+        warn.innerHTML = 'Bluetooth ist hier gesperrt – die Seite muss über <b>https</b> oder direkt in Chrome geöffnet sein.';
       } else {
         warn.innerHTML = 'Fehler: <b>' + e.name + '</b> – ' + e.message;
       }
@@ -215,16 +206,18 @@
     warn.style.display = 'none';
     if (devices.has(dev.id)) return;
     keepAwake();
-    const el = makeCard(dev);
-    const entry = { dev, el, hist: [], sum: 0, n: 0, max: 0, staleTimer: null };
-    devices.set(dev.id, entry);
 
-    dev.addEventListener('gattserverdisconnected', () => {
-      if (!devices.has(dev.id)) return;
-      const s = el.querySelector('.state');
-      s.textContent = 'Getrennt – verbinde neu …'; s.classList.add('off');
-      el.querySelector('.bpm').classList.add('stale');
-      setTimeout(() => devices.has(dev.id) && connect(entry), 2000);
+    const saved = store.get(dev.id) || {};
+    const el = makeTile(dev);
+    const entry = { dev, el, bpm: 0, maxHR: saved.maxHR || 190, staleTimer: null };
+    devices.set(dev.id, entry);
+    paint(entry);
+
+    const save = () => store.set(dev.id, { name: el.querySelector('.name').value, maxHR: entry.maxHR });
+    el.querySelector('.name').addEventListener('change', save);
+    el.querySelector('.max').addEventListener('click', () => {
+      const v = parseInt(prompt('Maximalpuls für ' + el.querySelector('.name').value + ' (z. B. 220 minus Alter):', entry.maxHR), 10);
+      if (v >= 120 && v <= 230) { entry.maxHR = v; paint(entry); save(); }
     });
     el.querySelector('.remove').addEventListener('click', () => {
       devices.delete(dev.id);
@@ -232,10 +225,17 @@
       el.remove();
       if (!devices.size) empty.style.display = 'block';
     });
+    dev.addEventListener('gattserverdisconnected', () => {
+      if (!devices.has(dev.id)) return;
+      el.classList.add('stale');
+      el.querySelector('.state').textContent = 'Getrennt – verbinde neu …';
+      setTimeout(() => devices.has(dev.id) && connect(entry), 2000);
+    });
     await connect(entry);
   }
+
   add.addEventListener('click', () => pick(false));
-  document.getElementById('addAll').addEventListener('click', () => pick(true));
+  addAll.addEventListener('click', () => pick(true));
 })();
 </script>
 </body>
