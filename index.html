@@ -21,28 +21,21 @@
 
   /* ---------- Kacheln ---------- */
   #grid { flex: 1; display: grid; gap: 12px; padding: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); grid-auto-rows: minmax(210px, 1fr); min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-  .tile { position: relative; border-radius: var(--r); padding: 4% 4.5% 3.5%; display: flex; flex-direction: column; background: var(--z0); color: #fff; transition: background .7s ease; min-height: 210px; container-type: size; overflow: hidden; }
-  .tile.light { color: #0b0d10; }
-  .tile.stale .bpm, .tile.stale .zone { opacity: .35; }
-  .tile.lost { background: var(--z0) !important; color: #fff; }
-  .tile.lost .bpm, .tile.lost .zone { opacity: .6; }
-
-  .tile .head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-  .tile .name { font-weight: 700; font-size: clamp(24px, 12cqh, 60px); letter-spacing: -.02em; line-height: 1.1; min-width: 0; flex: 1; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-  .tile .mid { flex: 1; display: flex; align-items: center; justify-content: center; gap: 5%; min-height: 0; }
-  .tile .bpm { font-weight: 700; line-height: .85; letter-spacing: -.045em; font-size: clamp(84px, 46cqh, 320px); font-variant-numeric: tabular-nums; transition: opacity .4s; }
-  .tile .zone { font-weight: 700; font-size: clamp(22px, 10cqh, 52px); letter-spacing: -.02em; line-height: 1.05; transition: opacity .4s; }
-  .tile .zone small { display: block; font-weight: 500; font-size: 48%; opacity: .8; margin-top: 5px; letter-spacing: 0; }
+  @media (min-width: 1400px) { #grid { grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 16px; padding: 16px; } }
+  @media (hover: hover) { .btn:hover { background: var(--glass-2); } .btn.primary:hover { background: #e6e6e6; } }
+  .tile { position: relative; border-radius: var(--r); background: #12161d; color: #fff; min-height: 210px; container-type: size; overflow: hidden; cursor: pointer; }
+  .tile canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; transition: filter .6s; }
+  .tile.lost canvas { filter: grayscale(1) brightness(.55); }
+  .tile.stale .bpm, .tile.stale .zone { opacity: .45; }
+  .tile .name { position: absolute; top: 3.5%; left: 4.5%; max-width: 70%; font-weight: 700; font-size: clamp(22px, 12cqh, 60px); letter-spacing: -.02em; line-height: 1.05; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 3px rgba(0,0,0,.6); text-align: left; }
+  .tile .cl { position: absolute; top: 4.5%; right: 4.5%; font-size: clamp(12px, 5.5cqh, 20px); font-weight: 600; opacity: .8; font-variant-numeric: tabular-nums; text-shadow: 0 1px 2px rgba(0,0,0,.7); }
+  .tile .mid { position: absolute; right: 4.5%; bottom: 7%; text-align: right; }
+  .tile .bpm { font-weight: 800; line-height: .85; letter-spacing: -.045em; font-size: clamp(84px, 52cqh, 340px); font-variant-numeric: tabular-nums; text-shadow: 0 3px 14px rgba(0,0,0,.55); transition: opacity .4s; }
+  .tile .zone { font-weight: 700; font-size: clamp(18px, 9cqh, 46px); letter-spacing: -.02em; line-height: 1.05; margin-top: 2%; text-shadow: 0 1px 4px rgba(0,0,0,.6); transition: opacity .4s; }
+  .tile .zone small { display: block; font-weight: 500; font-size: 55%; opacity: .85; margin-top: 3px; letter-spacing: 0; }
   .tile .zone small:empty { display: none; }
-
-  .tile .chart { position: relative; height: 30%; min-height: 64px; background: rgba(0,0,0,.26); border-radius: 14px; overflow: hidden; cursor: pointer; }
-  .tile.light .chart { background: rgba(0,0,0,.16); }
-  .tile canvas { width: 100%; height: 100%; display: block; }
-  .tile .cl { position: absolute; top: 6px; right: 10px; font-size: clamp(12px, 5cqh, 18px); font-weight: 600; color: #fff; opacity: .85; font-variant-numeric: tabular-nums; text-shadow: 0 1px 2px rgba(0,0,0,.6); pointer-events: none; }
-  .tile .zbar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 9px; background: rgba(0,0,0,.24); }
+  .tile .zbar { position: absolute; left: 0; right: 0; bottom: 0; display: flex; height: 7px; background: rgba(0,0,0,.35); }
   .tile .zbar span { display: block; height: 100%; transition: width .5s; }
-
   .tile .state { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-size: 14px; font-weight: 500; background: rgba(0,0,0,.5); color: #fff; padding: 6px 12px; border-radius: 999px; white-space: nowrap; backdrop-filter: blur(10px); display: flex; gap: 10px; align-items: center; }
   .tile .state:empty { display: none; }
   .tile .state button { background: #fff; color: #000; border-radius: 999px; padding: 4px 10px; font-weight: 600; }
@@ -325,12 +318,13 @@
     el.className = 'tile stale';
     el.innerHTML = `
       <div class="state"></div>
-      <div class="head"><button class="name" aria-label="Einstellungen"></button></div>
+      <canvas></canvas>
+      <button class="name" aria-label="Einstellungen"></button>
+      <div class="cl"></div>
       <div class="mid"><div class="bpm">–</div><div class="zone">Zone –<small></small></div></div>
-      <div class="chart"><canvas></canvas><div class="cl"></div></div>
       <div class="zbar">${ZONES.map(z => `<span style="background:var(${z.color});width:0"></span>`).join('')}</div>`;
-    el.querySelector('.name').onclick = () => personSheet(e);
-    el.querySelector('.chart').onclick = () => { rangeIdx = (rangeIdx + 1) % RANGES.length; for (const x of devices.values()) paint(x); };
+    el.querySelector('.name').onclick = ev => { ev.stopPropagation(); personSheet(e); };
+    el.onclick = () => { rangeIdx = (rangeIdx + 1) % RANGES.length; for (const x of devices.values()) paint(x); };
     grid.appendChild(el);
     empty.style.display = 'none';
     return el;
@@ -363,8 +357,6 @@
     el.querySelector('.cl').textContent = RANGES[rangeIdx].l + (e.n ? '  ·  Ø ' + Math.round(e.sum / e.n) + '  ·  max ' + e.max : '');
     if (bpm && !el.classList.contains('lost')) {
       const z = zoneFor(bpm, maxHR);
-      el.style.background = `var(${z.color})`;
-      el.classList.toggle('light', z.light);
       el.querySelector('.bpm').textContent = bpm;
       el.querySelector('.zone').innerHTML = 'Zone ' + z.n + '<small></small>';
     }
@@ -386,12 +378,13 @@
     const yOf = v => h - ((Math.min(Math.max(v, lo), hi) - lo) / (hi - lo)) * h;
     const xOf = tt => ((tt - t0) / span) * w;
     // Zonen als Farbbänder über die ganze Höhe
+    const cur = (e.bpm && !e.el.classList.contains('lost')) ? zoneFor(e.bpm, e.maxHR).n : -1;
     for (let i = 0; i < ZONES.length; i++) {
       const from = Math.max(ZONES[i].from * e.maxHR, lo), to = i + 1 < ZONES.length ? ZONES[i + 1].from * e.maxHR : hi;
-      ctx.fillStyle = css(ZONES[i].color); ctx.globalAlpha = .28;
+      ctx.fillStyle = css(ZONES[i].color); ctx.globalAlpha = i === cur ? .7 : .3;
       ctx.fillRect(0, yOf(to), w, yOf(from) - yOf(to));
     }
-    ctx.globalAlpha = .35; ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+    ctx.globalAlpha = .3; ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
     for (const z of ZONES.slice(1)) { const y = yOf(z.from * e.maxHR); ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
     ctx.globalAlpha = 1;
     const pts = e.samples.filter(s => s.t >= t0 - 5);
@@ -404,12 +397,14 @@
       ctx.beginPath(); ctx.moveTo(xOf(seg[0].t), h);
       for (const p of seg) ctx.lineTo(xOf(p.t), yOf(p.bpm));
       ctx.lineTo(xOf(seg[seg.length - 1].t), h); ctx.closePath();
-      ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.fill();
       ctx.beginPath(); seg.forEach((p, i) => i ? ctx.lineTo(xOf(p.t), yOf(p.bpm)) : ctx.moveTo(xOf(p.t), yOf(p.bpm)));
-      ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
+      ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 7; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 3.5; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
     }
     const last = pts[pts.length - 1];
-    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(xOf(last.t), yOf(last.bpm), 5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.beginPath(); ctx.arc(xOf(last.t), yOf(last.bpm), 9, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(xOf(last.t), yOf(last.bpm), 6, 0, Math.PI * 2); ctx.fill();
   }
 
   // ---------- Bluetooth ----------
@@ -418,7 +413,7 @@
   const setState = (e, text, retry) => {
     const s = e.el.querySelector('.state');
     s.innerHTML = text ? text + (retry ? ' <button>Neu suchen</button>' : '') : '';
-    if (retry) s.querySelector('button').onclick = () => research(e);
+    if (retry) s.querySelector('button').onclick = ev => { ev.stopPropagation(); research(e); };
   };
 
   function startIfIdle() {
@@ -536,7 +531,8 @@
     try { list = await navigator.bluetooth.getDevices(); } catch (x) { return; }
     const known = knownIds();
     for (const dev of list) if (known.includes(dev.id)) addDevice(dev);
-    if (list.length) $('autoHint').textContent = 'Gemerkte Uhren verbinden sich von selbst, sobald sie senden.';
+    if (list.length) $('autoHint').innerHTML = 'Gemerkte Uhren verbinden sich von selbst, sobald sie senden.';
+    else if (known.length) $('autoHint').innerHTML = 'Chrome hat die Uhren vergessen. Einmal in <b>chrome://flags</b> „Web Bluetooth new permissions backend“ aktivieren, dann merkt sich Chrome die Uhren dauerhaft.';
   }
 
   async function pick(all) {
@@ -562,15 +558,28 @@
   }
   $('add').addEventListener('click', () => pick(false));
   $('addAll').addEventListener('click', () => pick(true));
+  document.addEventListener('keydown', ev => {
+    if (sheetBg.classList.contains('open') || ev.target.tagName === 'INPUT') { if (ev.key === 'Escape') closeSheet(); return; }
+    const k = ev.key.toLowerCase();
+    if (k === 'f') { document.body.classList.contains('full') ? exitFull() : $('full').click(); }
+    else if (k === 'escape') exitFull();
+    else if (k === 'a') pick(false);
+    else if (k === ' ') { ev.preventDefault(); $('session').click(); }
+    else if (k === 'k') { rangeIdx = (rangeIdx + 1) % RANGES.length; for (const e of devices.values()) paint(e); }
+    else if (k === 'b' && !$('export').disabled) $('export').click();
+  });
 
   // Hinweis je nach Browser-Fähigkeit
   if (!('wakeLock' in navigator)) { const h = document.createElement('div'); h.style.cssText = 'color:var(--muted);font-size:14px;padding:2px 12px 10px'; h.textContent = 'Damit die Verbindungen halten: am iPad Einstellungen → Anzeige & Helligkeit → Automatische Sperre → Nie.'; $('bar').after(h); }
   if (navigator.bluetooth.getDevices) autoConnect();
   else {
     const k = knownIds().map(id => (store.get('dev:' + id) || {}).name).filter(Boolean);
-    $('autoHint').innerHTML = (k.length ? 'Bekannt: <b>' + k.join(', ') + '</b>. ' : '') +
-      'Dieser Browser merkt sich Uhren nicht über das Schließen hinaus – nach dem Öffnen jede Uhr einmal antippen. Mit Chrome (Android/PC) geht es automatisch.';
+    const pc = matchMedia('(pointer: fine)').matches;
+    $('autoHint').innerHTML = (k.length ? 'Bekannt: <b>' + k.join(', ') + '</b>. ' : '') + (pc
+      ? 'Damit Chrome die Uhren dauerhaft behält: <b>chrome://flags</b> öffnen, „Web Bluetooth new permissions backend“ auf Enabled, Chrome neu starten. Danach verbinden sich bekannte Uhren beim Öffnen von selbst.'
+      : 'Dieser Browser merkt sich Uhren nicht über das Schließen hinaus – nach dem Öffnen jede Uhr einmal antippen. Am PC mit Chrome geht es automatisch.');
   }
+  if (matchMedia('(pointer: fine)').matches) { const h = document.createElement('div'); h.style.cssText = 'color:var(--muted);font-size:13px;padding:0 12px 10px'; h.textContent = 'Tasten: A Uhr hinzufügen · Leertaste Pause/Weiter · K Kurven-Zeitfenster · B Bericht · F Vollbild · Esc beenden'; $('bar').after(h); }
 })();
 </script>
 </body>
