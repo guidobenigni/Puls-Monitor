@@ -28,20 +28,18 @@
   .tile.lost .bpm, .tile.lost .zone { opacity: .6; }
 
   .tile .head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-  .tile .name { font-weight: 700; font-size: clamp(24px, 11cqh, 56px); letter-spacing: -.02em; line-height: 1.1; min-width: 0; flex: 1; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .tile .stats { display: flex; gap: 14px; font-size: clamp(14px, 6cqh, 26px); font-variant-numeric: tabular-nums; white-space: nowrap; opacity: .85; }
-  .tile .more { width: clamp(34px, 9cqh, 48px); height: clamp(34px, 9cqh, 48px); border-radius: 50%; background: rgba(0,0,0,.22); display: grid; place-items: center; flex: none; }
-  .tile.light .more { background: rgba(0,0,0,.12); }
-  .tile .more svg { width: 55%; height: 55%; fill: currentColor; }
+  .tile .name { font-weight: 700; font-size: clamp(24px, 12cqh, 60px); letter-spacing: -.02em; line-height: 1.1; min-width: 0; flex: 1; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   .tile .mid { flex: 1; display: flex; align-items: center; justify-content: center; gap: 5%; min-height: 0; }
   .tile .bpm { font-weight: 700; line-height: .85; letter-spacing: -.045em; font-size: clamp(84px, 46cqh, 320px); font-variant-numeric: tabular-nums; transition: opacity .4s; }
   .tile .zone { font-weight: 700; font-size: clamp(22px, 10cqh, 52px); letter-spacing: -.02em; line-height: 1.05; transition: opacity .4s; }
   .tile .zone small { display: block; font-weight: 500; font-size: 48%; opacity: .8; margin-top: 5px; letter-spacing: 0; }
+  .tile .zone small:empty { display: none; }
 
-  .tile .chart { height: 26%; min-height: 56px; background: rgba(0,0,0,.26); border-radius: 14px; overflow: hidden; }
+  .tile .chart { position: relative; height: 30%; min-height: 64px; background: rgba(0,0,0,.26); border-radius: 14px; overflow: hidden; cursor: pointer; }
   .tile.light .chart { background: rgba(0,0,0,.16); }
   .tile canvas { width: 100%; height: 100%; display: block; }
+  .tile .cl { position: absolute; top: 6px; right: 10px; font-size: clamp(12px, 5cqh, 18px); font-weight: 600; color: #fff; opacity: .85; font-variant-numeric: tabular-nums; text-shadow: 0 1px 2px rgba(0,0,0,.6); pointer-events: none; }
   .tile .zbar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 9px; background: rgba(0,0,0,.24); }
   .tile .zbar span { display: block; height: 100%; transition: width .5s; }
 
@@ -64,8 +62,6 @@
   .btn svg { width: 18px; height: 18px; fill: currentColor; }
   #timer { font-weight: 700; font-size: 26px; font-variant-numeric: tabular-nums; letter-spacing: -.02em; padding: 0 10px; min-width: 84px; text-align: center; }
   .spacer { flex: 1; }
-  #legend { display: flex; gap: 3px; align-items: center; color: var(--muted); font-size: 12px; margin-right: 6px; }
-  #legend span { width: 18px; height: 8px; border-radius: 3px; display: block; }
 
   #exitFull { position: fixed; top: calc(14px + env(safe-area-inset-top)); right: calc(14px + env(safe-area-inset-right)); z-index: 20; display: none; width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,.55); color: #fff; backdrop-filter: blur(10px); place-items: center; }
   #exitFull svg { width: 20px; height: 20px; fill: currentColor; }
@@ -77,6 +73,7 @@
   #warn b { color: #fff; font-weight: 600; }
   #empty { grid-column: 1 / -1; align-self: center; text-align: center; color: var(--muted); font-size: 20px; line-height: 1.5; padding: 40px 24px; max-width: 520px; margin: 0 auto; }
   #empty b { color: var(--text); font-weight: 600; }
+  #empty button { color: var(--blue); text-decoration: underline; font-size: 15px; }
 
   /* ---------- Sheet ---------- */
   #sheetBg { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: none; z-index: 30; align-items: flex-end; justify-content: center; }
@@ -92,6 +89,8 @@
   .row.action { justify-content: center; font-weight: 600; }
   .row.action.danger { color: var(--red); }
   .row.action.blue { color: var(--blue); }
+  #sheet .report { max-height: 60vh; overflow-y: auto; margin-bottom: 8px; }
+  #sheet .report img { width: 100%; border-radius: 10px; margin-bottom: 10px; display: block; background: #fff; }
   #sheet textarea { width: 100%; height: 140px; background: var(--glass); color: var(--text); border: 0; border-radius: 12px; padding: 10px; font: 13px/1.4 ui-monospace, monospace; resize: none; margin-bottom: 8px; }
   #sheet .close { display: block; width: 100%; height: 48px; border-radius: 12px; background: var(--glass-2); font-weight: 600; font-size: 16px; margin-top: 4px; }
 </style>
@@ -101,7 +100,7 @@
 <div id="warn"></div>
 
 <div id="grid">
-  <div id="empty"><b>Noch niemand verbunden.</b><br>Auf der Uhr den Herzfrequenz-Broadcast einschalten, dann unten „Uhr hinzufügen“ – einmal pro Person. Die Aufzeichnung startet von selbst mit dem ersten Puls.<p id="autoHint" style="font-size:15px;margin:16px 0 0;line-height:1.5"></p></div>
+  <div id="empty"><b>Noch niemand verbunden.</b><br>Auf der Uhr den Herzfrequenz-Broadcast einschalten, dann unten „Uhr hinzufügen“ – einmal pro Person. Die Aufzeichnung startet von selbst mit dem ersten Puls.<p id="autoHint" style="font-size:15px;margin:16px 0 0;line-height:1.5"></p><p style="margin:14px 0 0"><button id="addAll">Uhr wird nicht gefunden? Alle Bluetooth-Geräte anzeigen</button></p></div>
 </div>
 
 <div id="bar">
@@ -111,14 +110,8 @@
     <div id="timer">00:00</div>
     <button id="reset" class="btn" disabled title="Zurücksetzen"><svg viewBox="0 0 24 24"><path d="M12 5V2L7 6.5 12 11V8a5 5 0 1 1-5 5H5a7 7 0 1 0 7-8z"/></svg></button>
   </div>
-  <div class="group">
-    <button id="r10" class="btn on">10 min</button>
-    <button id="rAll" class="btn">Gesamt</button>
-  </div>
-  <button id="export" class="btn" disabled>Exportieren</button>
+  <button id="export" class="btn" disabled>Bericht</button>
   <div class="spacer"></div>
-  <div id="legend">0<span style="background:var(--z0)"></span><span style="background:var(--z1)"></span><span style="background:var(--z2)"></span><span style="background:var(--z3)"></span><span style="background:var(--z4)"></span><span style="background:var(--z5)"></span>5</div>
-  <button id="addAll" class="btn" title="Zum Testen: alle Bluetooth-Geräte">Alle Geräte</button>
   <button id="full" class="btn">Vollbild</button>
 </div>
 
@@ -131,7 +124,8 @@
   const $ = id => document.getElementById(id);
   const grid = $('grid'), empty = $('empty'), warn = $('warn');
   const devices = new Map();
-  let wakeLock = null, showAll = false;
+  let wakeLock = null, rangeIdx = 1;
+  const RANGES = [{ s: 180, l: '3 min' }, { s: 300, l: '5 min' }, { s: 600, l: '10 min' }, { s: 0, l: 'Gesamt' }];
 
   // ---------- Zonen (Anteil des Maximalpulses, wie bei Whoop) ----------
   const ZONES = [
@@ -172,7 +166,7 @@
   const now = () => session.elapsed + (session.running ? (Date.now() - session.startedAt) / 1000 : 0);
   function setSessionUI() {
     const b = $('session');
-    b.textContent = session.running ? 'Pause' : (session.elapsed ? 'Weiter' : 'Aufzeichnung startet automatisch');
+    b.textContent = session.running ? 'Pause' : (session.elapsed ? 'Weiter' : 'Startet automatisch');
     b.classList.toggle('rec', session.running);
     const has = session.elapsed > 0 || session.running;
     $('reset').disabled = !has; $('export').disabled = !has;
@@ -188,10 +182,8 @@
     setSessionUI(); $('timer').textContent = '00:00'; store.del('session');
   }));
   function resetStats(e) { e.samples = []; e.zoneSec = [0,0,0,0,0,0]; e.sum = 0; e.n = 0; e.max = 0; e.lastSampleT = 0; paint(e); }
-  $('r10').addEventListener('click', () => setRange(false));
-  $('rAll').addEventListener('click', () => setRange(true));
-  function setRange(all) { showAll = all; $('r10').classList.toggle('on', !all); $('rAll').classList.toggle('on', all); for (const e of devices.values()) drawChart(e); }
   setInterval(() => { $('timer').textContent = fmt(now()); }, 500);
+  setInterval(() => { if (session.running) for (const e of devices.values()) drawChart(e); }, 2000);
 
   // Sitzung alle 10 s sichern, damit ein Neuladen nichts verliert
   function persist() {
@@ -218,22 +210,85 @@
     }
     return rows.join('\n');
   }
-  $('export').addEventListener('click', async () => {
-    const text = csv();
-    const fname = 'training-' + new Date().toISOString().slice(0, 16).replace(/[T:]/g, '-') + '.csv';
-    const file = new File([text], fname, { type: 'text/csv' });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try { await navigator.share({ files: [file], title: 'Training' }); return; } catch (e) { if (e.name === 'AbortError') return; }
+  // Ein Blatt pro Person (A4-Hochformat als Bild)
+  function renderReport(e) {
+    const W = 1240, H = 1754, P = 90;
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const x = c.getContext('2d');
+    const dur = now(), zt = e.zoneSec, total = zt.reduce((a, b) => a + b, 0) || 1;
+    const col = v => css(v);
+    x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+    x.fillStyle = '#111'; x.font = '700 78px -apple-system, Helvetica, Arial'; x.fillText(e.name, P, 170);
+    x.fillStyle = '#777'; x.font = '400 32px -apple-system, Helvetica, Arial';
+    x.fillText(new Date().toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + '   ·   Dauer ' + fmt(dur) + '   ·   HFmax ' + e.maxHR, P, 225);
+    // Kennzahlen
+    const kp = [['Ø Puls', e.n ? Math.round(e.sum / e.n) : '–'], ['Max', e.max || '–'], ['Zeit Zone 4–5', fmt(zt[4] + zt[5])], ['Zeit Zone 3', fmt(zt[3])]];
+    kp.forEach((k, i) => {
+      const bx = P + i * ((W - 2 * P) / 4);
+      x.fillStyle = '#111'; x.font = '700 72px -apple-system, Helvetica, Arial'; x.fillText(String(k[1]), bx, 360);
+      x.fillStyle = '#777'; x.font = '400 28px -apple-system, Helvetica, Arial'; x.fillText(k[0], bx, 405);
+    });
+    // Zonenbalken
+    let y = 500;
+    x.fillStyle = '#111'; x.font = '600 34px -apple-system, Helvetica, Arial'; x.fillText('Zeit in den Zonen', P, y); y += 40;
+    const bw = W - 2 * P - 260;
+    for (let i = 5; i >= 0; i--) {
+      const frac = zt[i] / total;
+      x.fillStyle = col(ZONES[i].color); x.fillRect(P + 150, y, Math.max(6, frac * bw), 44);
+      x.fillStyle = '#111'; x.font = '600 30px -apple-system, Helvetica, Arial'; x.fillText('Zone ' + i, P, y + 32);
+      x.fillStyle = '#555'; x.font = '400 28px -apple-system, Helvetica, Arial';
+      x.fillText(fmt(zt[i]) + '  ·  ' + Math.round(frac * 100) + ' %', P + 150 + Math.max(6, frac * bw) + 18, y + 32);
+      y += 62;
     }
-    // Fallback: Text zum Kopieren + Download-Versuch
-    let copied = false;
-    try { await navigator.clipboard.writeText(text); copied = true; } catch (e) {}
-    openSheet(`<h2>Export</h2><p style="color:var(--muted);margin:0 0 10px;line-height:1.45">${copied ? 'Die Daten liegen in der Zwischenablage – in Notizen, Mail oder Numbers einfügen.' : 'Text markieren und kopieren, dann in Notizen, Mail oder Numbers einfügen.'}</p>
-      <textarea readonly>${text.replace(/</g, '&lt;')}</textarea>
-      <button class="row action blue" id="dl">Als Datei herunterladen</button><button class="close">Fertig</button>`, s => {
-      s.querySelector('#dl').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'text/csv' })); a.download = fname; a.click(); };
+    // Pulskurve über das ganze Training
+    y += 40;
+    x.fillStyle = '#111'; x.font = '600 34px -apple-system, Helvetica, Arial'; x.fillText('Pulsverlauf', P, y); y += 30;
+    const cx = P, cy = y, cw = W - 2 * P, ch = H - y - 150;
+    const lo = e.maxHR * .45, hi = e.maxHR * 1.02, span = Math.max(dur, 60);
+    const yOf = v => cy + ch - ((Math.min(Math.max(v, lo), hi) - lo) / (hi - lo)) * ch;
+    const xOf = t => cx + (t / span) * cw;
+    for (let i = 0; i < ZONES.length; i++) {
+      const from = Math.max(ZONES[i].from * e.maxHR, lo), to = i + 1 < ZONES.length ? ZONES[i + 1].from * e.maxHR : hi;
+      x.fillStyle = col(ZONES[i].color); x.globalAlpha = .22; x.fillRect(cx, yOf(to), cw, yOf(from) - yOf(to));
+    }
+    x.globalAlpha = 1; x.fillStyle = '#666'; x.font = '400 24px -apple-system, Helvetica, Arial'; x.textAlign = 'right';
+    for (const z of ZONES.slice(1)) x.fillText(Math.round(z.from * e.maxHR), cx - 12, yOf(z.from * e.maxHR) + 8);
+    x.textAlign = 'center';
+    const step = span > 3600 ? 600 : span > 1500 ? 300 : 60;
+    for (let t = 0; t <= span; t += step) { x.fillStyle = '#666'; x.fillText(fmt(t), xOf(t), cy + ch + 40); x.strokeStyle = 'rgba(0,0,0,.08)'; x.beginPath(); x.moveTo(xOf(t), cy); x.lineTo(xOf(t), cy + ch); x.stroke(); }
+    x.textAlign = 'left';
+    const pts = e.samples;
+    if (pts.length > 1) {
+      x.strokeStyle = '#111'; x.lineWidth = 4; x.lineJoin = 'round'; x.lineCap = 'round';
+      x.beginPath(); let pen = false;
+      for (let i = 0; i < pts.length; i++) {
+        if (i && pts[i].t - pts[i - 1].t > 20) pen = false;
+        if (!pen) { x.moveTo(xOf(pts[i].t), yOf(pts[i].bpm)); pen = true; } else x.lineTo(xOf(pts[i].t), yOf(pts[i].bpm));
+      }
+      x.stroke();
+    } else { x.fillStyle = '#999'; x.font = '400 30px -apple-system, Helvetica, Arial'; x.fillText('Keine Pulsdaten aufgezeichnet.', cx, cy + ch / 2); }
+    x.fillStyle = '#aaa'; x.font = '400 22px -apple-system, Helvetica, Arial';
+    x.fillText('Zonen in % der maximalen Herzfrequenz: 1 ≥ 50 %, 2 ≥ 60 %, 3 ≥ 70 %, 4 ≥ 80 %, 5 ≥ 90 %. Lücken = keine Verbindung (z. B. unter Wasser).', P, H - 60);
+    return c;
+  }
+  const toBlob = c => new Promise(r => c.toBlob(r, 'image/png'));
+  const safe = t => t.replace(/[^\wäöüÄÖÜß-]+/g, '_');
+
+  $('export').addEventListener('click', async () => {
+    const people = [...devices.values()];
+    if (!people.length) return;
+    const canvases = people.map(e => [e, renderReport(e)]);
+    const files = [];
+    for (const [e, c] of canvases) files.push(new File([await toBlob(c)], 'Puls-' + safe(e.name) + '.png', { type: 'image/png' }));
+    const canShare = navigator.canShare && navigator.canShare({ files });
+    openSheet(`<h2>Bericht</h2>
+      <div class="report">${canvases.map(([, c]) => `<img src="${c.toDataURL('image/png')}" alt="">`).join('')}</div>
+      ${canShare ? '<button class="row action blue" id="sh">Teilen oder sichern</button>' : '<p style="color:var(--muted);font-size:14px;margin:0 0 10px;line-height:1.45">Bild gedrückt halten → „Zu Fotos hinzufügen“ oder „Teilen“.</p>'}
+      <button class="row action" id="csv" style="color:var(--muted);font-weight:500">Rohdaten kopieren (CSV)</button>
+      <button class="close">Fertig</button>`, s => {
+      if (canShare) s.querySelector('#sh').onclick = async () => { try { await navigator.share({ files, title: 'Pulsbericht' }); } catch (x) {} };
+      s.querySelector('#csv').onclick = async () => { try { await navigator.clipboard.writeText(csv()); s.querySelector('#csv').textContent = 'Kopiert'; } catch (x) { s.querySelector('#csv').textContent = 'Kopieren nicht möglich'; } };
       s.querySelector('.close').onclick = closeSheet;
-      s.querySelector('textarea').onclick = ev => ev.target.select();
     });
   });
 
@@ -269,16 +324,13 @@
     const el = document.createElement('div');
     el.className = 'tile stale';
     el.innerHTML = `
-      <div class="state">Verbinde …</div>
-      <div class="head">
-        <button class="name"></button>
-        <div class="stats"><span class="avg">Ø –</span><span class="mx">max –</span></div>
-        <button class="more" aria-label="Einstellungen"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="19" cy="12" r="2.2"/></svg></button>
-      </div>
-      <div class="mid"><div class="bpm">–</div><div class="zone">Zone –<small>&nbsp;</small></div></div>
-      <div class="chart"><canvas></canvas></div>
+      <div class="state"></div>
+      <div class="head"><button class="name" aria-label="Einstellungen"></button></div>
+      <div class="mid"><div class="bpm">–</div><div class="zone">Zone –<small></small></div></div>
+      <div class="chart"><canvas></canvas><div class="cl"></div></div>
       <div class="zbar">${ZONES.map(z => `<span style="background:var(${z.color});width:0"></span>`).join('')}</div>`;
-    el.querySelector('.name').onclick = el.querySelector('.more').onclick = () => personSheet(e);
+    el.querySelector('.name').onclick = () => personSheet(e);
+    el.querySelector('.chart').onclick = () => { rangeIdx = (rangeIdx + 1) % RANGES.length; for (const x of devices.values()) paint(x); };
     grid.appendChild(el);
     empty.style.display = 'none';
     return el;
@@ -308,14 +360,13 @@
   function paint(e) {
     const { el, bpm, maxHR } = e;
     el.querySelector('.name').textContent = e.name;
-    el.querySelector('.avg').textContent = 'Ø ' + (e.n ? Math.round(e.sum / e.n) : '–');
-    el.querySelector('.mx').textContent = 'max ' + (e.max || '–');
-    if (bpm) {
+    el.querySelector('.cl').textContent = RANGES[rangeIdx].l + (e.n ? '  ·  Ø ' + Math.round(e.sum / e.n) + '  ·  max ' + e.max : '');
+    if (bpm && !el.classList.contains('lost')) {
       const z = zoneFor(bpm, maxHR);
       el.style.background = `var(${z.color})`;
       el.classList.toggle('light', z.light);
       el.querySelector('.bpm').textContent = bpm;
-      el.querySelector('.zone').innerHTML = 'Zone ' + z.n + '<small>' + z.label + ' · ' + Math.round(bpm / maxHR * 100) + ' %</small>';
+      el.querySelector('.zone').innerHTML = 'Zone ' + z.n + '<small></small>';
     }
     const total = e.zoneSec.reduce((a, b) => a + b, 0) || 1;
     el.querySelectorAll('.zbar span').forEach((s, i) => s.style.width = (e.zoneSec[i] / total * 100) + '%');
@@ -330,12 +381,18 @@
     const ctx = canvas.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
-    const t = now(), span = showAll ? Math.max(t, 60) : 600, t0 = showAll ? 0 : Math.max(0, t - span);
-    const top = e.maxHR * 1.05;
-    const yOf = v => h - 5 - (Math.min(v, top) / top) * (h - 10);
+    const t = now(), all = RANGES[rangeIdx].s === 0, span = all ? Math.max(t, 60) : RANGES[rangeIdx].s, t0 = all ? 0 : Math.max(0, t - span);
+    const lo = e.maxHR * .45, hi = e.maxHR * 1.02;
+    const yOf = v => h - ((Math.min(Math.max(v, lo), hi) - lo) / (hi - lo)) * h;
     const xOf = tt => ((tt - t0) / span) * w;
-    ctx.lineWidth = 1; ctx.globalAlpha = .5;
-    for (const z of ZONES.slice(1)) { const y = yOf(z.from * e.maxHR); ctx.strokeStyle = css(z.color); ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+    // Zonen als Farbbänder über die ganze Höhe
+    for (let i = 0; i < ZONES.length; i++) {
+      const from = Math.max(ZONES[i].from * e.maxHR, lo), to = i + 1 < ZONES.length ? ZONES[i + 1].from * e.maxHR : hi;
+      ctx.fillStyle = css(ZONES[i].color); ctx.globalAlpha = .28;
+      ctx.fillRect(0, yOf(to), w, yOf(from) - yOf(to));
+    }
+    ctx.globalAlpha = .35; ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+    for (const z of ZONES.slice(1)) { const y = yOf(z.from * e.maxHR); ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
     ctx.globalAlpha = 1;
     const pts = e.samples.filter(s => s.t >= t0 - 5);
     if (pts.length < 2) return;
@@ -347,12 +404,12 @@
       ctx.beginPath(); ctx.moveTo(xOf(seg[0].t), h);
       for (const p of seg) ctx.lineTo(xOf(p.t), yOf(p.bpm));
       ctx.lineTo(xOf(seg[seg.length - 1].t), h); ctx.closePath();
-      ctx.fillStyle = 'rgba(255,255,255,.14)'; ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fill();
       ctx.beginPath(); seg.forEach((p, i) => i ? ctx.lineTo(xOf(p.t), yOf(p.bpm)) : ctx.moveTo(xOf(p.t), yOf(p.bpm)));
-      ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
     }
     const last = pts[pts.length - 1];
-    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(xOf(last.t), yOf(last.bpm), 4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(xOf(last.t), yOf(last.bpm), 5, 0, Math.PI * 2); ctx.fill();
   }
 
   // ---------- Bluetooth ----------
@@ -370,7 +427,7 @@
   }
   function onHR(e, bpm) {
     e.lastData = Date.now();
-    if (!bpm || bpm > 250) { setState(e, 'Uhr misst nicht – sitzt sie fest am Handgelenk?'); return; }
+    if (!bpm || bpm > 250) return;
     startIfIdle();
     e.bpm = bpm;
     e.el.classList.remove('stale', 'lost');
@@ -393,7 +450,6 @@
     for (let attempt = 1; devices.has(e.dev.id) && e.gen === gen; attempt++) {
       const dev = e.dev;
       try {
-        setState(e, attempt === 1 ? 'Verbinde …' : 'Verbinde neu … (' + attempt + ')');
         const server = await withTimeout(dev.gatt.connect(), 10000);
         const svc = await withTimeout(server.getPrimaryService('heart_rate'), 8000);
         const ch = await withTimeout(svc.getCharacteristic('heart_rate_measurement'), 8000);
@@ -405,8 +461,7 @@
         break;
       } catch (err) {
         try { dev.gatt.disconnect(); } catch (x) {}
-        if (attempt >= 3) setState(e, 'Wartet auf die Uhr – Broadcast auf der Uhr starten', true);
-        else setState(e, 'Uhr sendet nicht – warte …');
+        if (attempt === 10) setState(e, 'Uhr seit einigen Minuten weg', true);
         await new Promise(r => setTimeout(r, attempt > 6 ? 15000 : Math.min(2000 * attempt, 8000)));
       }
     }
@@ -438,7 +493,7 @@
   }
   async function research(e) {
     let nd;
-    try { nd = await navigator.bluetooth.requestDevice({ filters: [{ services: ['heart_rate'] }] }); } catch (x) { return; }
+    try { nd = await navigator.bluetooth.requestDevice({ filters: [{ services: ['heart_rate'] }] }); } catch (x) { warn.style.display = 'block'; warn.textContent = 'Keine Uhr ausgewählt. Sendet sie gerade? Dann noch einmal „Neu suchen“.'; return; }
     if (nd.id !== e.dev.id && devices.has(nd.id)) { warn.style.display = 'block'; warn.textContent = 'Diese Uhr ist schon einer anderen Person zugeordnet.'; return; }
     devices.delete(e.dev.id); forget(e.dev);
     try { e.dev.gatt.disconnect(); } catch (x) {}
@@ -492,11 +547,14 @@
         : { filters: [{ services: ['heart_rate'] }] });
     } catch (err) {
       warn.style.display = 'block';
-      if (err.name === 'NotFoundError') warn.innerHTML = all
+      const name = (err && err.name) || (typeof err === 'string' ? err : ''), msg = (err && err.message) || '';
+      if (!name && !msg) { warn.innerHTML = 'Verbindung nicht zustande gekommen. Prüfe: Bluetooth am iPad an? Bluefy darf Bluetooth nutzen (iPad-Einstellungen → Bluefy)? Uhr sendet gerade? Dann noch einmal „Uhr hinzufügen“.'; return; }
+      if (name === 'NotFoundError') warn.innerHTML = all
         ? 'Auswahl abgebrochen oder kein Gerät gefunden. Ist Bluetooth für diese App erlaubt?'
         : 'Keine Uhr gefunden, die gerade Puls sendet. Broadcast auf der Uhr einschalten – Galaxy Watch: „Heart for Bluetooth“ starten, Whoop: Heart Rate Broadcast. Die Uhr darf nicht in den Bluetooth-Einstellungen des iPads gekoppelt sein.';
-      else if (err.name === 'SecurityError') warn.innerHTML = 'Bluetooth ist hier gesperrt – die Seite muss über <b>https</b> geöffnet sein.';
-      else warn.innerHTML = 'Fehler: <b>' + err.name + '</b> – ' + err.message;
+      else if (name === 'SecurityError') warn.innerHTML = 'Bluetooth ist hier gesperrt – die Seite muss über <b>https</b> geöffnet sein.';
+      else if (name === 'NotAllowedError') warn.innerHTML = 'Bluetooth-Zugriff wurde verweigert. iPad-Einstellungen → Bluefy → Bluetooth erlauben.';
+      else warn.innerHTML = 'Fehler: <b>' + esc(name || 'unbekannt') + '</b> ' + esc(msg);
       return;
     }
     warn.style.display = 'none';
