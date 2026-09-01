@@ -8,54 +8,53 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0b0f16;
-    --text: #f4f6fa;
-    --muted: #8b95a7;
-    /* Zonenfarben nach Whoop-Vorbild */
+    --bg: #0b0f16; --panel: #161c27; --text: #f4f6fa; --muted: #8b95a7;
     --z0: #4a5261; --z1: #4a9dd8; --z2: #3ec46d; --z3: #f2c531; --z4: #f58a1f; --z5: #e8323c;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: "Barlow", system-ui, sans-serif; overflow: hidden; }
   body { display: flex; flex-direction: column; }
 
-  #grid {
-    flex: 1; display: grid; gap: 10px; padding: 10px;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-    grid-auto-rows: 1fr;
-  }
-  .tile {
-    position: relative; border-radius: 22px; padding: 4% 5%;
-    display: flex; flex-direction: column; justify-content: space-between;
-    background: var(--z0); color: #fff; transition: background .6s;
-    min-height: 200px; container-type: size;
-  }
+  #grid { flex: 1; display: grid; gap: 10px; padding: 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); grid-auto-rows: 1fr; min-height: 0; }
+
+  .tile { position: relative; border-radius: 22px; padding: 3.5% 4.5% 3%; display: flex; flex-direction: column; background: var(--z0); color: #fff; transition: background .6s; min-height: 240px; container-type: size; overflow: hidden; }
   .tile.light { color: #101418; }
-  .tile.stale { opacity: .45; }
-  .tile .name {
-    font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: clamp(28px, 14cqh, 64px);
-    background: none; border: 0; color: inherit; width: 100%; padding: 0; outline: none; font-variant: normal;
-    text-overflow: ellipsis; line-height: 1;
-  }
+  .tile.stale .bpm, .tile.stale .zone { opacity: .35; }
+
+  .tile .head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .tile .name { font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: clamp(26px, 12cqh, 60px); background: none; border: 0; color: inherit; min-width: 0; flex: 1; padding: 0; outline: none; line-height: 1; }
   .tile .name:focus { text-decoration: underline dotted; }
-  .tile .bpm {
-    font-family: "Barlow Condensed", sans-serif; font-weight: 700; line-height: .85; letter-spacing: -.02em;
-    font-size: clamp(90px, 55cqh, 340px); font-variant-numeric: tabular-nums; text-align: center;
-  }
-  .tile .foot { display: flex; justify-content: space-between; align-items: baseline; font-size: clamp(18px, 9cqh, 40px); line-height: 1; }
-  .tile .zone { font-family: "Barlow Condensed", sans-serif; font-weight: 700; }
-  .tile .max { background: none; border: 0; color: inherit; font: inherit; opacity: .75; cursor: pointer; padding: 0; }
-  .tile .state { position: absolute; top: 10px; right: 14px; font-size: 14px; opacity: .8; }
-  .tile .remove { position: absolute; bottom: 8px; right: 12px; background: none; border: 0; color: inherit; font: inherit; font-size: 13px; opacity: 0; cursor: pointer; }
-  .tile:hover .remove, .tile:focus-within .remove { opacity: .7; }
+  .tile .stats { font-size: clamp(14px, 6cqh, 26px); font-variant-numeric: tabular-nums; white-space: nowrap; opacity: .85; display: flex; gap: 12px; }
+  .tile .stats button { background: none; border: 0; color: inherit; font: inherit; padding: 0; cursor: pointer; text-decoration: underline dotted; }
 
-  #bar { display: flex; gap: 8px; padding: 0 10px 10px; align-items: center; }
-  #bar button { border: 0; border-radius: 12px; padding: 12px 16px; font: inherit; font-size: 15px; cursor: pointer; background: #1b2230; color: var(--text); }
+  .tile .mid { flex: 1; display: flex; align-items: center; justify-content: center; gap: 4%; min-height: 0; }
+  .tile .bpm { font-family: "Barlow Condensed", sans-serif; font-weight: 700; line-height: .85; letter-spacing: -.02em; font-size: clamp(80px, 44cqh, 300px); font-variant-numeric: tabular-nums; transition: opacity .4s; }
+  .tile .zone { font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: clamp(22px, 11cqh, 56px); line-height: 1; text-align: left; transition: opacity .4s; }
+  .tile .zone small { display: block; font-family: "Barlow", sans-serif; font-weight: 400; font-size: 50%; opacity: .8; margin-top: 4px; }
+
+  .tile .chart { height: 27%; min-height: 56px; background: rgba(0,0,0,.28); border-radius: 12px; overflow: hidden; }
+  .tile.light .chart { background: rgba(0,0,0,.18); }
+  .tile canvas { width: 100%; height: 100%; display: block; }
+  .tile .zbar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 8px; background: rgba(0,0,0,.25); }
+  .tile .zbar span { display: block; height: 100%; }
+
+  .tile .state { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); font-size: 14px; background: rgba(0,0,0,.45); color: #fff; padding: 4px 10px; border-radius: 8px; white-space: nowrap; }
+  .tile .state:empty { display: none; }
+  .tile .research { position: absolute; top: 36px; left: 50%; transform: translateX(-50%); border: 0; border-radius: 10px; background: #fff; color: #111; font: inherit; font-size: 15px; padding: 8px 14px; cursor: pointer; display: none; }
+  .tile .remove { position: absolute; bottom: 6px; right: 12px; background: none; border: 0; color: inherit; font: inherit; font-size: 12px; opacity: 0; cursor: pointer; }
+  .tile:hover .remove, .tile:focus-within .remove { opacity: .6; }
+
+  #bar { display: flex; gap: 8px; padding: 0 10px 10px; align-items: center; flex-wrap: wrap; }
+  #bar button { border: 0; border-radius: 12px; padding: 12px 16px; font: inherit; font-size: 15px; cursor: pointer; background: var(--panel); color: var(--text); }
+  #bar button:disabled { opacity: .4; cursor: default; }
   #bar #add { background: var(--text); color: var(--bg); font-weight: 500; }
+  #bar #session.running { background: var(--z5); color: #fff; }
   #bar .spacer { flex: 1; }
-  #bar #legend { display: flex; gap: 4px; }
-  #legend span { width: 28px; height: 10px; border-radius: 3px; display: block; }
+  #timer { font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 28px; font-variant-numeric: tabular-nums; min-width: 90px; text-align: center; }
+  #legend { display: flex; gap: 4px; align-items: center; color: var(--muted); font-size: 13px; }
+  #legend span { width: 22px; height: 10px; border-radius: 3px; display: block; }
 
-  #warn { display: none; margin: 10px; background: #3a2323; color: #ffd6d0; border-radius: 12px; padding: 12px 14px; line-height: 1.4; font-size: 15px; }
+  #warn { display: none; margin: 10px 10px 0; background: #3a2323; color: #ffd6d0; border-radius: 12px; padding: 12px 14px; line-height: 1.4; font-size: 15px; }
   #warn b { color: #fff; font-weight: 500; }
   #empty { grid-column: 1 / -1; align-self: center; text-align: center; color: var(--muted); font-size: 22px; line-height: 1.5; padding: 40px 20px; }
   body.hide-bar #bar, body.hide-bar #warn { display: none !important; }
@@ -66,79 +65,106 @@
 <div id="warn"></div>
 
 <div id="grid">
-  <div id="empty">Noch niemand verbunden.<br>Auf der Uhr den Herzfrequenz-Broadcast einschalten, dann unten „Uhr verbinden“ – einmal pro Person.</div>
+  <div id="empty">Noch niemand verbunden.<br>Auf der Uhr den Herzfrequenz-Broadcast einschalten, dann „Uhr verbinden“ – einmal pro Person.</div>
 </div>
 
 <div id="bar">
   <button id="add">Uhr verbinden</button>
-  <button id="addAll" title="Zum Testen">Alle Geräte</button>
+  <button id="addAll" title="Zum Testen: zeigt alle Bluetooth-Geräte">Alle Geräte</button>
+  <button id="session">Training starten</button>
+  <div id="timer">00:00</div>
+  <button id="reset" disabled>Zurücksetzen</button>
+  <button id="range">Kurve: 10 min</button>
+  <button id="export" disabled>CSV</button>
   <div class="spacer"></div>
-  <div id="legend" title="Zone 0 bis 5">
-    <span style="background:var(--z0)"></span><span style="background:var(--z1)"></span><span style="background:var(--z2)"></span>
-    <span style="background:var(--z3)"></span><span style="background:var(--z4)"></span><span style="background:var(--z5)"></span>
-  </div>
+  <div id="legend">0<span style="background:var(--z0)"></span><span style="background:var(--z1)"></span><span style="background:var(--z2)"></span><span style="background:var(--z3)"></span><span style="background:var(--z4)"></span><span style="background:var(--z5)"></span>5</div>
   <button id="full">Vollbild</button>
 </div>
 
 <script>
 (() => {
-  const grid = document.getElementById('grid');
-  const empty = document.getElementById('empty');
-  const warn = document.getElementById('warn');
-  const add = document.getElementById('add');
-  const addAll = document.getElementById('addAll');
+  const $ = id => document.getElementById(id);
+  const grid = $('grid'), empty = $('empty'), warn = $('warn');
   const devices = new Map();
   let wakeLock = null;
 
-  // Zonen wie bei Whoop: Anteil der maximalen Herzfrequenz
+  // ---------- Zonen (Whoop-Logik: Anteil des Maximalpulses) ----------
   const ZONES = [
-    { n: 0, from: 0,    color: '--z0', light: false },
-    { n: 1, from: 0.50, color: '--z1', light: false },
-    { n: 2, from: 0.60, color: '--z2', light: true  },
-    { n: 3, from: 0.70, color: '--z3', light: true  },
-    { n: 4, from: 0.80, color: '--z4', light: true  },
-    { n: 5, from: 0.90, color: '--z5', light: false },
+    { n: 0, from: 0,    color: '--z0', light: false, label: 'Ruhe' },
+    { n: 1, from: 0.50, color: '--z1', light: false, label: 'sehr leicht' },
+    { n: 2, from: 0.60, color: '--z2', light: true,  label: 'leicht' },
+    { n: 3, from: 0.70, color: '--z3', light: true,  label: 'moderat' },
+    { n: 4, from: 0.80, color: '--z4', light: true,  label: 'hart' },
+    { n: 5, from: 0.90, color: '--z5', light: false, label: 'maximal' },
   ];
-  const zoneFor = (bpm, max) => { const p = bpm / max; let z = ZONES[0]; for (const zz of ZONES) if (p >= zz.from) z = zz; return z; };
+  const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const zoneFor = (bpm, max) => { let z = ZONES[0]; for (const zz of ZONES) if (bpm / max >= zz.from) z = zz; return z; };
 
-  // Namen und Max-Puls merken (wenn der Browser das erlaubt)
+  // ---------- Speicher für Namen / Maximalpuls ----------
   const store = { get(k) { try { return JSON.parse(localStorage.getItem('pm:' + k)); } catch (e) { return null; } },
                   set(k, v) { try { localStorage.setItem('pm:' + k, JSON.stringify(v)); } catch (e) {} } };
 
+  // ---------- Session ----------
+  const session = { running: false, startedAt: 0, elapsed: 0 };
+  const fmt = s => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+  const sessionSeconds = () => session.elapsed + (session.running ? (Date.now() - session.startedAt) / 1000 : 0);
+  $('session').addEventListener('click', () => {
+    if (session.running) { session.elapsed = sessionSeconds(); session.running = false; $('session').textContent = 'Weiter'; $('session').classList.remove('running'); }
+    else { session.running = true; session.startedAt = Date.now(); $('session').textContent = 'Pause'; $('session').classList.add('running'); $('reset').disabled = false; $('export').disabled = false; keepAwake(); }
+  });
+  $('reset').addEventListener('click', () => {
+    if (!confirm('Training zurücksetzen? Kurven und Zonenzeiten aller Personen werden gelöscht.')) return;
+    session.running = false; session.elapsed = 0; $('session').textContent = 'Training starten'; $('session').classList.remove('running');
+    $('reset').disabled = true; $('export').disabled = true; $('timer').textContent = '00:00';
+    for (const e of devices.values()) { e.samples = []; e.zoneSec = [0,0,0,0,0,0]; e.sum = 0; e.n = 0; e.max = 0; e.lastSampleT = 0; paint(e); }
+  });
+  let showAll = false;
+  $('range').addEventListener('click', () => { showAll = !showAll; $('range').textContent = showAll ? 'Kurve: gesamt' : 'Kurve: 10 min'; for (const e of devices.values()) drawChart(e); });
+  setInterval(() => { $('timer').textContent = fmt(sessionSeconds()); }, 500);
+
+  // ---------- CSV-Export ----------
+  $('export').addEventListener('click', () => {
+    let rows = ['Person;Sekunde;Puls;Zone'];
+    for (const e of devices.values()) {
+      const name = e.el.querySelector('.name').value.replace(/;/g, ',');
+      for (const s of e.samples) rows.push(`${name};${Math.round(s.t)};${s.bpm};${zoneFor(s.bpm, e.maxHR).n}`);
+    }
+    const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'training-' + new Date().toISOString().slice(0, 16).replace(/[T:]/g, '-') + '.csv'; a.click();
+  });
+
+  // ---------- Vollbild / Wachhalten ----------
+  async function keepAwake() { try { if ('wakeLock' in navigator && !wakeLock) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {} }
+  $('full').addEventListener('click', () => {
+    document.body.classList.add('hide-bar');
+    if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
+  });
+  let lastTap = 0;
+  document.addEventListener('pointerdown', () => { const t = Date.now(); if (t - lastTap < 350) document.body.classList.remove('hide-bar'); lastTap = t; });
+  window.addEventListener('resize', () => { for (const e of devices.values()) drawChart(e); });
+
   if (!navigator.bluetooth) {
     warn.style.display = 'block';
-    warn.innerHTML = 'Dieser Browser kann kein Web Bluetooth. Am iPhone die App <b>Bluefy</b> nutzen, sonst Chrome (Android, Windows, Mac).';
-    add.disabled = addAll.disabled = true;
+    warn.innerHTML = 'Dieser Browser kann kein Web Bluetooth. Am iPhone/iPad die App <b>Bluefy</b> nutzen, sonst Chrome (Android, Windows, Mac).';
+    $('add').disabled = $('addAll').disabled = true;
     return;
   }
 
-  async function keepAwake() {
-    try { if ('wakeLock' in navigator && !wakeLock) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
-  }
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { wakeLock = null; keepAwake(); } });
-
-  document.getElementById('full').addEventListener('click', () => {
-    document.body.classList.toggle('hide-bar');
-    if (document.body.classList.contains('hide-bar') && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
-  });
-  // Doppeltipp irgendwo bringt die Leiste zurück
-  let lastTap = 0;
-  document.addEventListener('pointerdown', () => { const t = Date.now(); if (t - lastTap < 350) document.body.classList.remove('hide-bar'); lastTap = t; });
-
-  const parseHR = dv => (dv.getUint8(0) & 1) ? dv.getUint16(1, true) : dv.getUint8(1);
-
-  function makeTile(dev) {
-    const saved = store.get(dev.id) || {};
+  // ---------- Kachel ----------
+  function makeTile(dev, saved) {
     const el = document.createElement('div');
     el.className = 'tile stale';
     el.innerHTML = `
       <div class="state">Verbinde …</div>
-      <input class="name" aria-label="Name">
-      <div class="bpm">–</div>
-      <div class="foot">
-        <div class="zone">Zone –</div>
-        <button class="max" title="Maximalpuls ändern">max –</button>
+      <button class="research">Neu suchen</button>
+      <div class="head">
+        <input class="name" aria-label="Name">
+        <div class="stats"><span class="avg">Ø –</span><span class="mx">max –</span><button class="hrmax" title="Maximalpuls ändern">HFmax 190</button></div>
       </div>
+      <div class="mid"><div class="bpm">–</div><div class="zone">Zone –<small>&nbsp;</small></div></div>
+      <div class="chart"><canvas></canvas></div>
+      <div class="zbar">${ZONES.map(z => `<span style="background:var(${z.color});width:0"></span>`).join('')}</div>
       <button class="remove">Entfernen</button>`;
     const name = el.querySelector('.name');
     name.value = saved.name || dev.name || 'Name';
@@ -148,40 +174,129 @@
     return el;
   }
 
-  function paint(entry) {
-    const { el, bpm, maxHR } = entry;
-    el.querySelector('.max').textContent = 'max ' + maxHR;
-    if (!bpm) return;
-    const z = zoneFor(bpm, maxHR);
-    el.style.background = `var(${z.color})`;
-    el.classList.toggle('light', z.light);
-    el.querySelector('.zone').textContent = 'Zone ' + z.n;
-    el.querySelector('.bpm').textContent = bpm;
-  }
-
-  function onHR(entry, bpm) {
-    if (!bpm) return;
-    entry.bpm = bpm;
-    entry.el.classList.remove('stale');
-    paint(entry);
-    clearTimeout(entry.staleTimer);
-    entry.staleTimer = setTimeout(() => entry.el.classList.add('stale'), 8000);
-  }
-
-  async function connect(entry) {
-    const { dev, el } = entry;
-    const state = el.querySelector('.state');
-    try {
-      state.textContent = 'Verbinde …';
-      const server = await dev.gatt.connect();
-      const svc = await server.getPrimaryService('heart_rate');
-      const ch = await svc.getCharacteristic('heart_rate_measurement');
-      ch.addEventListener('characteristicvaluechanged', e => onHR(entry, parseHR(e.target.value)));
-      await ch.startNotifications();
-      state.textContent = '';
-    } catch (err) {
-      state.textContent = 'Keine Verbindung – sendet die Uhr?';
+  function paint(e) {
+    const { el, bpm, maxHR } = e;
+    el.querySelector('.hrmax').textContent = 'HFmax ' + maxHR;
+    el.querySelector('.avg').textContent = 'Ø ' + (e.n ? Math.round(e.sum / e.n) : '–');
+    el.querySelector('.mx').textContent = 'max ' + (e.max || '–');
+    if (bpm) {
+      const z = zoneFor(bpm, maxHR);
+      el.style.background = `var(${z.color})`;
+      el.classList.toggle('light', z.light);
+      el.querySelector('.bpm').textContent = bpm;
+      el.querySelector('.zone').innerHTML = 'Zone ' + z.n + '<small>' + z.label + ' · ' + Math.round(bpm / maxHR * 100) + ' %</small>';
     }
+    const total = e.zoneSec.reduce((a, b) => a + b, 0) || 1;
+    el.querySelectorAll('.zbar span').forEach((s, i) => s.style.width = (e.zoneSec[i] / total * 100) + '%');
+    drawChart(e);
+  }
+
+  function drawChart(e) {
+    const canvas = e.el.querySelector('canvas');
+    const dpr = window.devicePixelRatio || 1, w = canvas.clientWidth, h = canvas.clientHeight;
+    if (!w || !h) return;
+    if (canvas.width !== Math.round(w * dpr)) { canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); }
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    const now = sessionSeconds();
+    const span = showAll ? Math.max(now, 60) : 600;
+    const t0 = showAll ? 0 : Math.max(0, now - span);
+    const pts = e.samples.filter(s => s.t >= t0);
+    const yOf = v => h - 4 - (Math.min(v, e.maxHR * 1.05) / (e.maxHR * 1.05)) * (h - 8);
+    // Zonenlinien
+    ctx.lineWidth = 1;
+    for (const z of ZONES.slice(1)) {
+      const y = yOf(z.from * e.maxHR);
+      ctx.strokeStyle = css(z.color); ctx.globalAlpha = .55;
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    if (pts.length < 2) return;
+    const xOf = t => ((t - t0) / span) * w;
+    // Fläche
+    ctx.beginPath(); ctx.moveTo(xOf(pts[0].t), h);
+    for (const p of pts) ctx.lineTo(xOf(p.t), yOf(p.bpm));
+    ctx.lineTo(xOf(pts[pts.length - 1].t), h); ctx.closePath();
+    ctx.fillStyle = 'rgba(255,255,255,.14)'; ctx.fill();
+    // Linie, Farbe nach Zone
+    ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    for (let i = 1; i < pts.length; i++) {
+      if (pts[i].t - pts[i - 1].t > 20) continue; // Lücke (z. B. unter Wasser) nicht verbinden
+      ctx.strokeStyle = '#fff';
+      ctx.beginPath(); ctx.moveTo(xOf(pts[i - 1].t), yOf(pts[i - 1].bpm)); ctx.lineTo(xOf(pts[i].t), yOf(pts[i].bpm)); ctx.stroke();
+    }
+    // aktueller Punkt
+    const last = pts[pts.length - 1];
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(xOf(last.t), yOf(last.bpm), 4, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // ---------- Bluetooth ----------
+  const parseHR = dv => (dv.getUint8(0) & 1) ? dv.getUint16(1, true) : dv.getUint8(1);
+  const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
+
+  function onHR(e, bpm) {
+    if (!bpm) return;
+    e.bpm = bpm; e.lastData = Date.now();
+    e.el.classList.remove('stale');
+    e.el.querySelector('.state').textContent = '';
+    e.el.querySelector('.research').style.display = 'none';
+    if (session.running) {
+      const t = sessionSeconds();
+      if (t - e.lastSampleT >= 1) {
+        e.samples.push({ t, bpm });
+        const dt = e.lastSampleT ? Math.min(t - e.lastSampleT, 5) : 1;
+        e.zoneSec[zoneFor(bpm, e.maxHR).n] += dt;
+        e.lastSampleT = t;
+        e.sum += bpm; e.n++; e.max = Math.max(e.max, bpm);
+      }
+    }
+    paint(e);
+  }
+
+  async function connect(e) {
+    if (e.connecting) return;
+    e.connecting = true;
+    const gen = e.gen, state = e.el.querySelector('.state'), research = e.el.querySelector('.research');
+    for (let attempt = 1; devices.has(e.dev.id) && e.gen === gen; attempt++) {
+      const dev = e.dev;
+      try {
+        state.textContent = attempt === 1 ? 'Verbinde …' : 'Verbinde neu … (' + attempt + ')';
+        const server = await withTimeout(dev.gatt.connect(), 10000);
+        const svc = await withTimeout(server.getPrimaryService('heart_rate'), 8000);
+        const ch = await withTimeout(svc.getCharacteristic('heart_rate_measurement'), 8000);
+        ch.addEventListener('characteristicvaluechanged', ev => onHR(e, parseHR(ev.target.value)));
+        await withTimeout(ch.startNotifications(), 8000);
+        e.lastData = Date.now(); state.textContent = ''; research.style.display = 'none';
+        break;
+      } catch (err) {
+        try { dev.gatt.disconnect(); } catch (x) {}
+        if (attempt >= 3) { state.textContent = 'Uhr meldet sich nicht – auf der Uhr „Restart beacon“'; research.style.display = 'block'; }
+        else state.textContent = 'Uhr sendet nicht – warte …';
+        await new Promise(r => setTimeout(r, Math.min(2000 * attempt, 8000)));
+      }
+    }
+    if (e.gen === gen) e.connecting = false;
+  }
+
+  // Wächter: lange keine Werte → Kachel blass, Verbindung neu aufbauen
+  setInterval(() => {
+    const now = Date.now();
+    for (const e of devices.values()) {
+      if (now - e.lastData > 8000) e.el.classList.add('stale');
+      if (!e.connecting && now - e.lastData > 15000) { try { e.dev.gatt.disconnect(); } catch (x) {} connect(e); }
+    }
+  }, 3000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') { wakeLock = null; keepAwake(); for (const e of devices.values()) if (!e.connecting) connect(e); }
+  });
+
+  function bind(e, dev) {
+    dev.addEventListener('gattserverdisconnected', () => {
+      if (e.dev !== dev || !devices.has(dev.id)) return;
+      e.el.classList.add('stale');
+      setTimeout(() => devices.has(dev.id) && e.dev === dev && connect(e), 1500);
+    });
   }
 
   async function pick(all) {
@@ -190,17 +305,13 @@
       dev = await navigator.bluetooth.requestDevice(all
         ? { acceptAllDevices: true, optionalServices: ['heart_rate'] }
         : { filters: [{ services: ['heart_rate'] }] });
-    } catch (e) {
+    } catch (err) {
       warn.style.display = 'block';
-      if (e.name === 'NotFoundError') {
-        warn.innerHTML = all
-          ? 'Auswahl abgebrochen oder kein Gerät gefunden. Ist Bluetooth für diese App erlaubt?'
-          : 'Keine Uhr gefunden, die gerade Puls sendet. Broadcast auf der Uhr einschalten (Galaxy Watch: „Heart for Bluetooth“ starten) und die Uhr von ihrer eigenen App trennen.';
-      } else if (e.name === 'SecurityError') {
-        warn.innerHTML = 'Bluetooth ist hier gesperrt – die Seite muss über <b>https</b> oder direkt in Chrome geöffnet sein.';
-      } else {
-        warn.innerHTML = 'Fehler: <b>' + e.name + '</b> – ' + e.message;
-      }
+      if (err.name === 'NotFoundError') warn.innerHTML = all
+        ? 'Auswahl abgebrochen oder kein Gerät gefunden. Ist Bluetooth für diese App erlaubt?'
+        : 'Keine Uhr gefunden, die gerade Puls sendet. Broadcast auf der Uhr einschalten (Galaxy Watch: „Heart for Bluetooth“ starten, Whoop: Heart Rate Broadcast).';
+      else if (err.name === 'SecurityError') warn.innerHTML = 'Bluetooth ist hier gesperrt – die Seite muss über <b>https</b> geöffnet sein.';
+      else warn.innerHTML = 'Fehler: <b>' + err.name + '</b> – ' + err.message;
       return;
     }
     warn.style.display = 'none';
@@ -208,34 +319,39 @@
     keepAwake();
 
     const saved = store.get(dev.id) || {};
-    const el = makeTile(dev);
-    const entry = { dev, el, bpm: 0, maxHR: saved.maxHR || 190, staleTimer: null };
-    devices.set(dev.id, entry);
-    paint(entry);
+    const el = makeTile(dev, saved);
+    const e = { dev, el, bpm: 0, maxHR: saved.maxHR || 190, lastData: Date.now(), connecting: false, gen: 0,
+                samples: [], zoneSec: [0,0,0,0,0,0], sum: 0, n: 0, max: 0, lastSampleT: 0 };
+    devices.set(dev.id, e);
+    paint(e);
+    bind(e, dev);
 
-    const save = () => store.set(dev.id, { name: el.querySelector('.name').value, maxHR: entry.maxHR });
+    const save = () => store.set(e.dev.id, { name: el.querySelector('.name').value, maxHR: e.maxHR });
     el.querySelector('.name').addEventListener('change', save);
-    el.querySelector('.max').addEventListener('click', () => {
-      const v = parseInt(prompt('Maximalpuls für ' + el.querySelector('.name').value + ' (z. B. 220 minus Alter):', entry.maxHR), 10);
-      if (v >= 120 && v <= 230) { entry.maxHR = v; paint(entry); save(); }
+    el.querySelector('.hrmax').addEventListener('click', () => {
+      const v = parseInt(prompt('Maximalpuls für ' + el.querySelector('.name').value + ' (Faustregel: 220 minus Alter):', e.maxHR), 10);
+      if (v >= 120 && v <= 230) { e.maxHR = v; e.zoneSec = [0,0,0,0,0,0]; for (const s of e.samples) e.zoneSec[zoneFor(s.bpm, v).n] += 1; paint(e); save(); }
+    });
+    el.querySelector('.research').addEventListener('click', async () => {
+      let nd;
+      try { nd = await navigator.bluetooth.requestDevice({ filters: [{ services: ['heart_rate'] }] }); } catch (x) { return; }
+      devices.delete(e.dev.id);
+      try { e.dev.gatt.disconnect(); } catch (x) {}
+      e.dev = nd; e.gen++; e.connecting = false;
+      devices.set(nd.id, e); save(); bind(e, nd);
+      connect(e);
     });
     el.querySelector('.remove').addEventListener('click', () => {
-      devices.delete(dev.id);
-      try { dev.gatt.disconnect(); } catch (e) {}
+      devices.delete(e.dev.id); e.gen++;
+      try { e.dev.gatt.disconnect(); } catch (x) {}
       el.remove();
       if (!devices.size) empty.style.display = 'block';
     });
-    dev.addEventListener('gattserverdisconnected', () => {
-      if (!devices.has(dev.id)) return;
-      el.classList.add('stale');
-      el.querySelector('.state').textContent = 'Getrennt – verbinde neu …';
-      setTimeout(() => devices.has(dev.id) && connect(entry), 2000);
-    });
-    await connect(entry);
+    await connect(e);
   }
 
-  add.addEventListener('click', () => pick(false));
-  addAll.addEventListener('click', () => pick(true));
+  $('add').addEventListener('click', () => pick(false));
+  $('addAll').addEventListener('click', () => pick(true));
 })();
 </script>
 </body>
